@@ -1,8 +1,8 @@
 importScripts("/src/js/idb.js");
 importScripts("/src/js/utility.js");
 
-var CACHE_STATIC_NAME = "static-v25";
-var CACHE_DYNAMIC_NAME = "dynamic-v3";
+var CACHE_STATIC_NAME = "static-v32";
+var CACHE_DYNAMIC_NAME = "dynamic-v2";
 var STATIC_FILES = [
   "/",
   "/index.html",
@@ -176,7 +176,6 @@ self.addEventListener("fetch", function (event) {
 //   );
 // });
 
-// 3rd step
 self.addEventListener("sync", function (event) {
   console.log("[Service Worker] Background syncing", event);
   if (event.tag === "sync-new-posts") {
@@ -204,7 +203,7 @@ self.addEventListener("sync", function (event) {
             .then(function (res) {
               console.log("Sent data", res);
               if (res.ok) {
-                // deleteItemFromData("sync-posts", dt.id); // Isn't working correctly!
+                deleteItemFromData("sync-posts", dt.id); // Isn't working correctly!
               }
             })
             .catch(function (err) {
@@ -212,10 +211,61 @@ self.addEventListener("sync", function (event) {
             });
         }
       })
-      // .then(function () {
-      //   // 4th step
-      //   // clearAllData("sync-posts");
-      // })
     );
   }
+});
+
+// 7th step
+self.addEventListener("notificationclick", function (event) {
+  var notification = event.notification;
+  var action = event.action;
+
+  console.log(notification);
+
+  if (action === "confirm") {
+    console.log("Confirm was chosen");
+    notification.close();
+  } else {
+    console.log(action);
+    // 11th step
+    event.waitUntil(
+      clients.matchAll().then(function (clis) {
+        var client = clis.find(function (c) {
+          return c.visibilityState === "visible";
+        });
+
+        if (client !== undefined) {
+          client.navigate(notification.data.url);
+          client.focus();
+        } else {
+          clients.openWindow(notification.data.url);
+        }
+        notification.close();
+      })
+    );
+  }
+});
+
+// 8th step
+self.addEventListener("notificationclose", function (event) {
+  console.log("Notification Was Closed", event);
+});
+
+//10th step
+self.addEventListener("push", function (event) {
+  console.log("Push Notification received", event);
+
+  var data = { title: "New!", content: "Something new happened!" };
+
+  if (event.data) {
+    data = JSON.parse(event.data.text());
+  }
+
+  var options = {
+    body: data.content,
+    icon: "/src/images/icons/app-icon-96x96.png",
+    badge: "/src/images/icons/app-icon-96x96.png",
+  };
+
+  event.waitUntil(self.registration.showNotification(data.title, options));
 });

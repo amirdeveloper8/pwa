@@ -154,7 +154,6 @@ form.addEventListener("submit", function (event) {
 
   closeCreatePostModal();
 
-  // 1st step
   if ("serviceWorker" in navigator && "SyncManager" in window) {
     navigator.serviceWorker.ready.then(function (sw) {
       var post = {
@@ -176,7 +175,6 @@ form.addEventListener("submit", function (event) {
         });
     });
   } else {
-    // 2nd step
     sendData();
   }
 });
