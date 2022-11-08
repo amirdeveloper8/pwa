@@ -14,7 +14,7 @@
     "complete",
     "tutorial"
   ],
-  "author": "Amir Mohammadi",
+  "author": "Amir Mohamadi",
   "license": "ISC",
   "dependencies": {
     "http-server": "^14.1.1"
